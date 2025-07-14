@@ -15,7 +15,7 @@ gazebo version: 11.14
 
 ## launch
 in /dev_ws  
--> colcon build --packages-select kumi_controller  
+-> colcon build --symlink-install 
 -> source install/setup.bash  
 -> ros2 launch kumi_controller kumi_gz.launch.py
 
