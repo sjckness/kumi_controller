@@ -17,6 +17,3 @@ controller_manager:
       allow_partial_joints_goal: true
       state_publish_rate: 50
       action_monitor_rate: 20
-
-    
-      

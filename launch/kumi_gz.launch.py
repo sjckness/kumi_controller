@@ -13,37 +13,33 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 import tempfile
 
-world_path = os.path.join('/home/andreas/dev_ws/src/kumi_controller', 'worlds', 'test_world.world')
-
+#define ros nodes to be launched
 def launch_setup(context, *args, **kwargs):
-    # Path al file Xacro
+    # xacro file path
     xacro_file = os.path.join(
         get_package_share_directory('kumi_controller'),
         'description',
         'kumi.xacro'
     )
 
-    print("xacrofile:" + xacro_file)
-
     pkg_share = FindPackageShare("kumi_controller").find("kumi_controller")
-    #urdf_file = os.path.join(pkg_share, "description", "kumi.xacro")
     yaml_path= os.path.join(pkg_share, "config", "position_cntr.yaml")
-    # Converte Xacro a URDF string
-    #robot_description = xacro.process_file(urdf_file)
     
-
+    #process xacro file to a str
     doc = xacro.parse(open(xacro_file))
     xacro.process_doc(doc)
     robot_description = doc.toxml()
 
+    #creates a temp .urdf file -> needed for node spown_entity.py
     with tempfile.NamedTemporaryFile(mode='w', suffix='.urdf', delete=False) as f:
         f.write(robot_description)
         f.flush()
         f.close()
         urdf_temp_path = f.name
 
+    #list of nodes to run
     return [
-        # Pubblica il robot URDF
+        # publish robot description (urdf)
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
@@ -52,9 +48,9 @@ def launch_setup(context, *args, **kwargs):
             output='screen',
         ),
 
-        # Nodo custom che pubblica su /world/default/create
+        # wwntity spown delayed in order to wait for plugins 
         TimerAction(
-            period=10.0,
+            period=5.0,
             actions=[
                 Node(
                     package='gazebo_ros',
@@ -74,8 +70,10 @@ def launch_setup(context, *args, **kwargs):
         ),
     ]
 
+#Launchdescription automatically called by ros while running this launch file
 def generate_launch_description():
     return LaunchDescription([
+        #launch an external process
         ExecuteProcess(
             cmd=['gazebo', '--verbose', 
                  '/usr/share/gazebo-11/worlds/empty.world',
@@ -83,6 +81,7 @@ def generate_launch_description():
             ],
             output='screen',
         ),
-    
+
+        #run an arbitrary py function with actions ore nodes to launch
         OpaqueFunction(function=launch_setup)
     ])
