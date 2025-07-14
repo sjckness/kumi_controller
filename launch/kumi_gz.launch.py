@@ -54,7 +54,7 @@ def launch_setup(context, *args, **kwargs):
 
         # Nodo custom che pubblica su /world/default/create
         TimerAction(
-            period=5.0,
+            period=10.0,
             actions=[
                 Node(
                     package='gazebo_ros',
