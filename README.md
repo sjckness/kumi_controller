@@ -3,7 +3,7 @@ ros2 + gazebo model and control
 
 
 ## Issues
-(+++)
+(+++) controller_manager not working
 
 ## Warnings
 
