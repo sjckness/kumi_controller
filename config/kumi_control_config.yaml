@@ -1,0 +1,19 @@
+---
+controller_manager:
+  ros__parameters:
+    update_rate: 1000
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+      update_rate: 1000
+    front_sh_trajectory_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+front_sh_trajectory_controller:
+  ros__parameters:
+    joints:
+      - front_sh
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity

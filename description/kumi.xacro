@@ -1,13 +1,17 @@
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro"  name="robot">
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro"  name="kumi">
 
 
-    <!-- Variables -->
+   
     <xacro:property name="thikness" value="0.3" />
     <xacro:property name="lenght" value="2" />
     <xacro:property name="leg_len" value="1.5" />
     <xacro:property name="foot_len" value="0.7" />
 
-    <!-- Specify some colours -->
+    <xacro:property name="controller_yaml_path" value="/home/andreas/dev_ws/install/kumi_controller/share/kumi_controller/config/position_cntr.yaml" />
+
+
+
 
     <material name="white">
         <color rgba="1 1 1 1"/>
@@ -22,9 +26,6 @@
     </material>
 
 
-
-    <!-- Specify some standard inertial calculations https://en.wikipedia.org/wiki/List_of_moments_of_inertia -->
-    <!-- These make use of xacro's mathematical functionality -->
 
     <xacro:macro name="inertial_sphere" params="mass radius *origin">
         <inertial>
@@ -59,11 +60,6 @@
     </xacro:macro>
 
 
-    <!-- base_link is a large rectangular plate. Some things to note: -->
-    <!-- - We set the visual origin Z to half the box height, so that the link origin sits at the bottom of the box -->
-    <!-- - We set the collision to be identical to the visual -->
-    <!-- - We specified the colour manually (but still need to enter a name) -->
-    <!-- - We specified all the inertial parameters manually -->
     <link name="body">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -87,10 +83,7 @@
         </inertial>
     </link>
 
-    <!-- slider_joint lets slider_link move back and forth along the top of the base in one dimension.  -->
-    <!-- - Origin is set to one of the top edges of the base_link box, so that our link skims across the top  -->
-    <!-- - It moves along the X axis -->
-    <!-- - We need to specify limits for the motion -->
+
     
     <joint name="front_sh" type="revolute">
         <origin xyz="${lenght/2} 0 ${-thikness/2}" rpy="0 0 0"/>
@@ -102,13 +95,11 @@
 
     <transmission name="front_sh_trans">
         <type>transmission_interface/SimpleTransmission</type>
-        <joint name="front_sh"/>
         <actuator name="motor1">
             <mechanicalReduction>1.0</mechanicalReduction>
         </actuator>
     </transmission>
 
-  <!-- ros2_control interface -->
   <ros2_control name="KumiHardware" type="system">
     <hardware>
       <plugin>gazebo_ros2_control/GazeboSystem</plugin>
@@ -120,11 +111,13 @@
     </joint>
   </ros2_control>
 
-    <!-- base_link is a large rectangular plate. Some things to note: -->
-    <!-- - We set the visual origin Z to half the box height, so that the link origin sits at the bottom of the box -->
-    <!-- - We set the collision to be identical to the visual -->
-    <!-- - We specified the colour manually (but still need to enter a name) -->
-    <!-- - We specified all the inertial parameters manually -->
+  <gazebo>
+    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+        <parameters>/home/andreas/dev_ws/install/kumi_controller/share/kumi_controller/config/kumi_control_config.yaml</parameters>  
+    </plugin>
+  </gazebo>
+
+
     <link name="front_leg">
         <visual>
             <origin xyz="${thikness/2} 0 ${-leg_len/4}" rpy="0 0 0"/>
@@ -148,7 +141,7 @@
         </inertial>
     </link>
 
-        <!-- This file is not a robot in and of itself, it just contains some useful tags that could be included in any robot -->
+    
 
    
 

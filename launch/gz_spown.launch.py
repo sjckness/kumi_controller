@@ -17,7 +17,8 @@ from ament_index_python.packages import get_package_share_directory
 
 pkg_share = FindPackageShare("kumi_controller").find("kumi_controller")
 xacro_file = os.path.join(pkg_share, 'description', 'kumi.xacro')
-yaml_config_path= os.path.join(pkg_share, "config", "kumi_control_config.yaml")
+yaml_path= os.path.join(pkg_share, "config", "position_cntr.yaml")
+
 robot_description_content = ParameterValue(
         Command(['xacro ', xacro_file]),
         value_type=str  #Indica esplicitamente che è una stringa
@@ -53,7 +54,7 @@ def launch_setup(context, *args, **kwargs):
 
         # wwntity spown delayed in order to wait for plugins 
         TimerAction(
-            period=1.0,
+            period=5.0,
             actions=[
                 Node(
                     package='gazebo_ros',
@@ -67,12 +68,12 @@ def launch_setup(context, *args, **kwargs):
         
         #wait before running the controller
         TimerAction(
-            period=1.0,
+            period=7.0,
             actions=[
                 Node(
                     package='controller_manager',
                     executable='ros2_control_node',
-                    parameters=[yaml_config_path],
+                    parameters=[yaml_path],
                     output='screen',
                 )
             ]
@@ -80,7 +81,7 @@ def launch_setup(context, *args, **kwargs):
 
         #wait before running controller nodes
         TimerAction(
-            period=3.0,
+            period=10.0,
             actions=[
                 Node(
                     package="controller_manager",
@@ -88,21 +89,12 @@ def launch_setup(context, *args, **kwargs):
                     arguments=["joint_state_broadcaster", "--controller-manager-timeout", "50"],
                     output="screen",
                 ),
-            ]
-        ),
-
-        #wait before running controller nodes
-        TimerAction(
-            period=3.0,
-            actions=[
                 Node(
                     package="controller_manager",
                     executable="spawner",
-                    arguments=["front_sh_trajectory_controller",
-                                "--controller-manager-timeout", "50"],
-                    parameters=[yaml_config_path],
+                    arguments=["joint1_trajectory_controller", "--controller-manager-timeout", "50"],
                     output="screen",
-                ),
+                )
             ]
         ),
     ]
@@ -111,17 +103,17 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     return LaunchDescription([
         # publish robot description (urdf)
-        Node(
-            package='robot_state_publisher',
-            executable='robot_state_publisher',
-            name='robot_state_publisher',
-            parameters=[robot_description],
-            output='screen',
-        ),
+        #Node(
+        #    package='robot_state_publisher',
+        #    executable='robot_state_publisher',
+        #    name='robot_state_publisher',
+        #    parameters=[robot_description],
+        #    output='screen',
+        #),
 
         #launch an external process
         TimerAction(
-            period=1.0,
+            period=3.0,
             actions=[
             ExecuteProcess(
                 cmd=['gazebo', '--verbose', 
