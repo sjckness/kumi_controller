@@ -2,14 +2,15 @@
 ros2 + gazebo model and control
 
 
-## Issues
-(+++) (2)joint_trajectory_controller not loaded
+## Issues / ToDo
+(+++) control the joint via python script
 
 
 ## Warnings
 
 ## Solved issues
-(+++) (1)controller_manager not working 15/07
+(+++) (1)controller_manager not working             15/07
+(+++) (2)joint_trajectory_controller not loaded     21/07
 
 ## About
 ubuntu version: 22.04.5 LTS  
