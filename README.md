@@ -25,3 +25,8 @@ in /dev_ws
 
 to kill gazebo
 -> killall -9 gazebo gzserver gzclient
+
+## joint/link structure
+body
+ |
+ --- front_sh --- 

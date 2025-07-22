@@ -16,8 +16,9 @@ from ament_index_python.packages import get_package_share_directory
 
 
 pkg_share = FindPackageShare("kumi_controller").find("kumi_controller")
-xacro_file = os.path.join(pkg_share, 'description', 'kumi.xacro')
+xacro_file = os.path.join(pkg_share, 'description', 'kumi_core.xacro')
 yaml_config_path= os.path.join(pkg_share, "config", "kumi_control_config.yaml")
+world_path = os.path.join(pkg_share, "worlds", "compton.world")
 robot_description_content = ParameterValue(
         Command(['xacro ', xacro_file]),
         value_type=str  #Indica esplicitamente che è una stringa
@@ -51,23 +52,23 @@ def launch_setup(context, *args, **kwargs):
             description = 'Path to the URDF file'
         ),
 
-        # wwntity spown delayed in order to wait for plugins 
+        # spawning kumi in gazebo
         TimerAction(
-            period=1.0,
+            period=0.1,
             actions=[
                 Node(
                     package='gazebo_ros',
                     executable='spawn_entity.py',
                     name='spawn_my_entity',
-                    arguments=['-file', urdf_path, '-z', '5', '-entity', 'kumi'],
+                    arguments=['-file', urdf_path, '-z', '2.7', '-entity', 'kumi'],
                     output='screen',
                 )
             ]
         ),
         
-        #wait before running the controller
+        # runs ros2_control_node
         TimerAction(
-            period=1.0,
+            period=0.1,
             actions=[
                 Node(
                     package='controller_manager',
@@ -78,9 +79,9 @@ def launch_setup(context, *args, **kwargs):
             ]
         ),
 
-        #wait before running controller nodes
+        #spawning joint_state_broadcaster
         TimerAction(
-            period=3.0,
+            period=0.1,
             actions=[
                 Node(
                     package="controller_manager",
@@ -90,10 +91,9 @@ def launch_setup(context, *args, **kwargs):
                 ),
             ]
         ),
-
-        #wait before running controller nodes
+        #spawning front_sh_trajectory_controller
         TimerAction(
-            period=3.0,
+            period=0.1,
             actions=[
                 Node(
                     package="controller_manager",
@@ -104,7 +104,9 @@ def launch_setup(context, *args, **kwargs):
                     output="screen",
                 ),
             ]
-        ),
+        )
+
+        
     ]
 
 #Launchdescription automatically called by ros while running this launch file
@@ -119,9 +121,9 @@ def generate_launch_description():
             output='screen',
         ),
 
-        #launch an external process
+        #launch gazebo
         TimerAction(
-            period=1.0,
+            period=0.1,
             actions=[
             ExecuteProcess(
                 cmd=['gazebo', '--verbose', 

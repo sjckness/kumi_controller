@@ -32,7 +32,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
     'console_scripts': [
-        'move_joint = kumi_controller.move_joint:main',
+        'controller = kumi_controller.kumi_controller:main',
     ],
 },
 

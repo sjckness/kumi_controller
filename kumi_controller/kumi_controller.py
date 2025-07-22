@@ -1,32 +1,35 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float64  # Use Float64 for simple position controllers
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
-class JointMover(Node):
+class TrajectoryPublisher(Node):
     def __init__(self):
-        super().__init__('joint_mover')
-        self.publisher_ = self.create_publisher(Float64, '/joint1_position_controller/command', 10)
+        super().__init__('trajectory_publisher')
+        self.publisher_ = self.create_publisher(
+            JointTrajectory,
+            '/front_sh_trajectory_controller/joint_trajectory',
+            10
+        )
 
-        timer_period = 2.0  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.position = 0.0
-        self.direction = 1.0
-        self.get_logger().info("JointMover node has been started.")
+        self.timer = self.create_timer(1.0, self.send_trajectory)
 
-    def timer_callback(self):
-        # Alternate the joint position between -1.0 and 1.0
-        self.position += 0.5 * self.direction
-        if self.position > 1.0 or self.position < -1.0:
-            self.direction *= -1.0
+    def send_trajectory(self):
+        msg = JointTrajectory()
+        msg.joint_names = ['front_sh']
 
-        msg = Float64()
-        msg.data = self.position
+        point = JointTrajectoryPoint()
+        point.positions = [1.0]  # posizione target in radianti
+        point.time_from_start.sec = 2
+
+        msg.points.append(point)
         self.publisher_.publish(msg)
-        self.get_logger().info(f"Publishing joint position: {msg.data:.2f}")
+        self.get_logger().info('Trajectory sent!')
+
+        self.timer.cancel()  # manda solo una volta
 
 def main(args=None):
     rclpy.init(args=args)
-    node = JointMover()
+    node = TrajectoryPublisher()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
