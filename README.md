@@ -3,14 +3,16 @@ ros2 + gazebo model and control
 
 
 ## Issues / ToDo
-(+++) control the joint via python script
+(+++) (4)robot goes around without permission!
 
 
 ## Warnings
+(+) no real time kernel
 
 ## Solved issues
 (+++) (1)controller_manager not working             15/07    
 (+++) (2)joint_trajectory_controller not loaded     21/07
+(+++) (3)control the joint via python script        22/07
 
 ## About
 ubuntu version: 22.04.5 LTS  
@@ -26,7 +28,16 @@ in /dev_ws
 to kill gazebo
 -> killall -9 gazebo gzserver gzclient
 
-## joint/link structure
-body
- |
- --- front_sh --- 
+
+## Descrizione delle giunzioni e link
+
+| Link         | Joint Parent     | Tipo Joint | Note                    |
+|--------------|------------------|------------|-------------------------|
+| base_link    | —                | —          | Base fissa              |
+| body         | base_link        | fixed      | Connessione fissa       |
+| front_leg    | body             | revolute   | Spalla anteriore        |
+| front_leg_d  | front_leg        | revolute   | Ginocchio anteriore     |
+| front_foot   | front_leg_d      | revolute   | Caviglia anteriore      |
+| back_leg     | body             | revolute   | Spalla posteriore       |
+| back_leg_d   | back_leg         | revolute   | Ginocchio posteriore    |
+| back_foot    | back_leg_d       | revolute   | Caviglia posteriore   

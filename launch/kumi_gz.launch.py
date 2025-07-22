@@ -104,6 +104,76 @@ def launch_setup(context, *args, **kwargs):
                     output="screen",
                 ),
             ]
+        ),
+         #spawning front_knee_trajectory_controller
+        TimerAction(
+            period=0.1,
+            actions=[
+                Node(
+                    package="controller_manager",
+                    executable="spawner",
+                    arguments=["front_knee_trajectory_controller",
+                                "--controller-manager-timeout", "50"],
+                    parameters=[yaml_config_path],
+                    output="screen",
+                ),
+            ]
+        ),
+        #spawning front_ank_trajectory_controller
+        TimerAction(
+            period=0.1,
+            actions=[
+                Node(
+                    package="controller_manager",
+                    executable="spawner",
+                    arguments=["front_ank_trajectory_controller",
+                                "--controller-manager-timeout", "50"],
+                    parameters=[yaml_config_path],
+                    output="screen",
+                ),
+            ]
+        ),
+        TimerAction(
+            period=0.1,
+            actions=[
+                Node(
+                    package="controller_manager",
+                    executable="spawner",
+                    arguments=["front_sh_trajectory_controller",
+                                "--controller-manager-timeout", "50"],
+                    parameters=[yaml_config_path],
+                    output="screen",
+                ),
+            ]
+        ),
+        #spawning back_sh_trajectory_controller
+        #spawning back_knee_trajectory_controller
+        TimerAction(
+            period=0.1,
+            actions=[
+                Node(
+                    package="controller_manager",
+                    executable="spawner",
+                    arguments=["back_knee_trajectory_controller",
+                                "--controller-manager-timeout", "50"],
+                    parameters=[yaml_config_path],
+                    output="screen",
+                ),
+            ]
+        ),
+        #spawning back_ank_trajectory_controller
+        TimerAction(
+            period=0.1,
+            actions=[
+                Node(
+                    package="controller_manager",
+                    executable="spawner",
+                    arguments=["back_ank_trajectory_controller",
+                                "--controller-manager-timeout", "50"],
+                    parameters=[yaml_config_path],
+                    output="screen",
+                ),
+            ]
         )
 
         
