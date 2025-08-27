@@ -3,7 +3,7 @@ ros2 + gazebo model and control
 
 
 ## Issues / ToDo
-(+++) (4)robot goes around without permission!
+(+++) define a trajectory to test  
 
 
 ## Warnings
@@ -11,8 +11,9 @@ ros2 + gazebo model and control
 
 ## Solved issues
 (+++) (1)controller_manager not working             15/07    
-(+++) (2)joint_trajectory_controller not loaded     21/07
-(+++) (3)control the joint via python script        22/07
+(+++) (2)joint_trajectory_controller not loaded     21/07  
+(+++) (3)control the joint via python script        22/07  
+(+++) (4)robot goes around without permission!      27/08  
 
 ## About
 ubuntu version: 22.04.5 LTS  
