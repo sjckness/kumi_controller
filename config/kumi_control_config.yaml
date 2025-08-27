@@ -5,67 +5,17 @@ controller_manager:
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
       update_rate: 1000
-    front_sh_trajectory_controller:
-      type: joint_trajectory_controller/JointTrajectoryController
-    front_knee_trajectory_controller:
-      type: joint_trajectory_controller/JointTrajectoryController
-    front_ank_trajectory_controller:
-      type: joint_trajectory_controller/JointTrajectoryController
-    back_sh_trajectory_controller:
-      type: joint_trajectory_controller/JointTrajectoryController
-    back_knee_trajectory_controller:
-      type: joint_trajectory_controller/JointTrajectoryController
-    back_ank_trajectory_controller:
+    multi_joint_trajectory_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
-front_sh_trajectory_controller:
+multi_joint_trajectory_controller:
   ros__parameters:
     joints:
       - front_sh
-    command_interfaces:
-      - position
-    state_interfaces:
-      - position
-      - velocity
-front_knee_trajectory_controller:
-  ros__parameters:
-    joints:
       - front_knee
-    command_interfaces:
-      - position
-    state_interfaces:
-      - position
-      - velocity
-front_ank_trajectory_controller:
-  ros__parameters:
-    joints:
       - front_ank
-    command_interfaces:
-      - position
-    state_interfaces:
-      - position
-      - velocity
-back_sh_trajectory_controller:
-  ros__parameters:
-    joints:
       - back_sh
-    command_interfaces:
-      - position
-    state_interfaces:
-      - position
-      - velocity
-back_knee_trajectory_controller:
-  ros__parameters:
-    joints:
       - back_knee
-    command_interfaces:
-      - position
-    state_interfaces:
-      - position
-      - velocity
-back_ank_trajectory_controller:
-  ros__parameters:
-    joints:
       - back_ank
     command_interfaces:
       - position

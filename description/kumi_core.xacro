@@ -48,14 +48,6 @@
             <parameters>/home/andreas/dev_ws/install/kumi_controller/share/kumi_controller/config/kumi_control_config.yaml</parameters>  
         </plugin>
     </gazebo>
-    
-    <link name="base_link"/>
-
-    <joint name="base_to_body" type="fixed">
-        <parent link="base_link"/>
-        <child link="body"/>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-    </joint>
 
     <link name="body">
         <visual>
@@ -75,7 +67,7 @@
         </collision>
         <inertial>
             <origin xyz="0 0 0" rpy="0 0 0"/>
-            <mass value="1" />
+            <mass value="0.1" />
             <inertia ixx="0.015" ixy="0.0" ixz="0.0" iyy="0.340833" iyz="0.0" izz="0.340833" />
         </inertial>
     </link>
@@ -116,7 +108,7 @@
         </collision>
         <inertial>
             <origin xyz="${thikness/2} 0 ${-leg_len/4}" rpy="0 0 0"/>
-            <mass value="1" />
+            <mass value="0.1" />
             <inertia ixx="0.090833" ixy="0.0" ixz="0.0" iyy="0.090833" iyz="0.0" izz="0.015000" />
         </inertial>
     </link>
@@ -156,7 +148,7 @@
         </collision>
         <inertial>
             <origin xyz="0 0 ${-leg_len/4}" rpy="0 0 0"/>
-            <mass value="1" />
+            <mass value="0.1" />
             <inertia ixx="0.090833" ixy="0.0" ixz="0.0" iyy="0.090833" iyz="0.0" izz="0.015000" />
         </inertial>
     </link>
@@ -192,7 +184,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <box size="${foot_len} ${foot_len} ${thikness/2}" />
+                <box size="${foot_len} ${foot_len} ${thikness-toll}" />
             </geometry>
         </collision>
         <surface>
@@ -205,7 +197,7 @@
         </surface>
         <inertial>
             <origin xyz="0 0 0" rpy="0 0 0"/>
-            <mass value="2" />
+            <mass value="1" />
             <inertia ixx="0.096667" ixy="0.0" ixz="0.0" iyy="0.096667" iyz="0.0" izz="0.163333" />
         </inertial>
     </link>
@@ -250,7 +242,7 @@
         </collision>
         <inertial>
             <origin xyz="${-thikness/2} 0 ${-leg_len/4}" rpy="0 0 0"/>
-            <mass value="1" />
+            <mass value="0.1" />
             <inertia ixx="0.090833" ixy="0.0" ixz="0.0" iyy="0.090833" iyz="0.0" izz="0.015000" />
         </inertial>
     </link>
@@ -291,7 +283,7 @@
         </collision>
         <inertial>
             <origin xyz="0 0 ${-leg_len/4}" rpy="0 0 0"/>
-            <mass value="1" />
+            <mass value="0.1" />
             <inertia ixx="0.090833" ixy="0.0" ixz="0.0" iyy="0.090833" iyz="0.0" izz="0.015000" />
         </inertial>
     </link>
@@ -327,7 +319,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <box size="${foot_len} ${foot_len} ${thikness/2}" />
+                <box size="${foot_len} ${foot_len} ${thikness-toll}" />
             </geometry>
         </collision>
         <surface>
@@ -340,7 +332,7 @@
         </surface>
         <inertial>
             <origin xyz="0 0 0" rpy="0 0 0"/>
-            <mass value="2" />
+            <mass value="1" />
             <inertia ixx="0.096667" ixy="0.0" ixz="0.0" iyy="0.096667" iyz="0.0" izz="0.163333" />
         </inertial>
     </link>

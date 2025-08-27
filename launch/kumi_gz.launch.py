@@ -54,13 +54,13 @@ def launch_setup(context, *args, **kwargs):
 
         # spawning kumi in gazebo
         TimerAction(
-            period=0.1,
+            period=1.0,
             actions=[
                 Node(
                     package='gazebo_ros',
                     executable='spawn_entity.py',
                     name='spawn_my_entity',
-                    arguments=['-file', urdf_path, '-z', '2.7', '-entity', 'kumi'],
+                    arguments=['-file', urdf_path, '-z', '5', '-entity', 'kumi'],
                     output='screen',
                 )
             ]
@@ -68,7 +68,7 @@ def launch_setup(context, *args, **kwargs):
         
         # runs ros2_control_node
         TimerAction(
-            period=0.1,
+            period=0.5,
             actions=[
                 Node(
                     package='controller_manager',
@@ -81,7 +81,7 @@ def launch_setup(context, *args, **kwargs):
 
         #spawning joint_state_broadcaster
         TimerAction(
-            period=0.1,
+            period=0.5,
             actions=[
                 Node(
                     package="controller_manager",
@@ -91,90 +91,22 @@ def launch_setup(context, *args, **kwargs):
                 ),
             ]
         ),
+
         #spawning front_sh_trajectory_controller
         TimerAction(
-            period=0.1,
+            period=0.5,
             actions=[
                 Node(
                     package="controller_manager",
                     executable="spawner",
-                    arguments=["front_sh_trajectory_controller",
-                                "--controller-manager-timeout", "50"],
-                    parameters=[yaml_config_path],
-                    output="screen",
-                ),
-            ]
-        ),
-         #spawning front_knee_trajectory_controller
-        TimerAction(
-            period=0.1,
-            actions=[
-                Node(
-                    package="controller_manager",
-                    executable="spawner",
-                    arguments=["front_knee_trajectory_controller",
-                                "--controller-manager-timeout", "50"],
-                    parameters=[yaml_config_path],
-                    output="screen",
-                ),
-            ]
-        ),
-        #spawning front_ank_trajectory_controller
-        TimerAction(
-            period=0.1,
-            actions=[
-                Node(
-                    package="controller_manager",
-                    executable="spawner",
-                    arguments=["front_ank_trajectory_controller",
-                                "--controller-manager-timeout", "50"],
-                    parameters=[yaml_config_path],
-                    output="screen",
-                ),
-            ]
-        ),
-        TimerAction(
-            period=0.1,
-            actions=[
-                Node(
-                    package="controller_manager",
-                    executable="spawner",
-                    arguments=["front_sh_trajectory_controller",
-                                "--controller-manager-timeout", "50"],
-                    parameters=[yaml_config_path],
-                    output="screen",
-                ),
-            ]
-        ),
-        #spawning back_sh_trajectory_controller
-        #spawning back_knee_trajectory_controller
-        TimerAction(
-            period=0.1,
-            actions=[
-                Node(
-                    package="controller_manager",
-                    executable="spawner",
-                    arguments=["back_knee_trajectory_controller",
-                                "--controller-manager-timeout", "50"],
-                    parameters=[yaml_config_path],
-                    output="screen",
-                ),
-            ]
-        ),
-        #spawning back_ank_trajectory_controller
-        TimerAction(
-            period=0.1,
-            actions=[
-                Node(
-                    package="controller_manager",
-                    executable="spawner",
-                    arguments=["back_ank_trajectory_controller",
+                    arguments=["multi_joint_trajectory_controller",
                                 "--controller-manager-timeout", "50"],
                     parameters=[yaml_config_path],
                     output="screen",
                 ),
             ]
         )
+        
 
         
     ]
@@ -193,7 +125,7 @@ def generate_launch_description():
 
         #launch gazebo
         TimerAction(
-            period=0.1,
+            period=1.0,
             actions=[
             ExecuteProcess(
                 cmd=['gazebo', '--verbose', 
