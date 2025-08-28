@@ -15,10 +15,11 @@ from ament_index_python.packages import get_package_share_directory
 
 
 
+
 pkg_share = FindPackageShare("kumi_controller").find("kumi_controller")
 xacro_file = os.path.join(pkg_share, 'description', 'kumi_core.xacro')
 yaml_config_path= os.path.join(pkg_share, "config", "kumi_control_config.yaml")
-world_path = os.path.join(pkg_share, "worlds", "compton.world")
+world_path = os.path.join(pkg_share, "worlds", "empty.world")
 robot_description_content = ParameterValue(
         Command(['xacro ', xacro_file]),
         value_type=str  #Indica esplicitamente che è una stringa
@@ -38,8 +39,10 @@ with tempfile.NamedTemporaryFile(mode='w', suffix='.urdf', delete=False) as f:
     urdf_temp_path = f.name
 
 print('temp:   ' + urdf_temp_path)
+urdf_file = {'urdf_file' : urdf_temp_path}
 
 urdf_path = LaunchConfiguration('urdf_path')
+
 
 
 #define ros nodes to be launched
@@ -138,5 +141,12 @@ def generate_launch_description():
             ]
         ),
         #run an arbitrary py function with actions ore nodes to launch
-        OpaqueFunction(function=launch_setup)
+        OpaqueFunction(function=launch_setup),
+
+        Node(
+            package='kumi_controller',
+            executable='com_calculator',
+            name='com_calculator',
+            parameters=[urdf_file]
+        )
     ])

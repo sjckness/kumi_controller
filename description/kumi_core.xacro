@@ -53,7 +53,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <box size="${lenght} ${thikness} ${thikness}" />
+                <box size="${lenght} ${thikness*2} ${thikness}" />
             </geometry>
             <material name="green">
                 <color rgba="0.2 1 0.2 1"/>
@@ -62,24 +62,50 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <box size="${2-toll} ${thikness-toll} ${thikness-toll}" />
+                <box size="${lenght/1.5-toll} ${thikness*2-toll} ${thikness-toll}" />
             </geometry>
         </collision>
         <inertial>
             <origin xyz="0 0 0" rpy="0 0 0"/>
-            <mass value="0.1" />
+            <mass value="1" />
             <inertia ixx="0.015" ixy="0.0" ixz="0.0" iyy="0.340833" iyz="0.0" izz="0.340833" />
         </inertial>
     </link>
 
-    
+    <gazebo reference="body">
+        <sensor name="imu_sensor" type="imu">
+            <update_rate>20.0</update_rate>
+            <always_on>true</always_on>
+            <imu>
+            <angular_velocity>
+                <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>0.1</stddev>
+                </noise>
+            </angular_velocity>
+            <linear_acceleration>
+                <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>0.1</stddev>
+                </noise>
+            </linear_acceleration>
+            </imu>
+            <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
+            <ros>
+                <namespace>/</namespace>
+                <remapping>~/out:=/imu</remapping>
+            </ros>
+            </plugin>
+        </sensor>
+    </gazebo>
+        
     
     <joint name="front_sh" type="revolute">
-        <origin xyz="${lenght/2} 0 ${-thikness/2}" rpy="0 0 0"/>
+        <origin xyz="${lenght/2+thikness/2} 0 0" rpy="0 0 0"/>
         <parent link="body"/>
         <child link="front_leg"/>
         <axis xyz="0 -1 0"/>
-        <limit lower="-${pi/4}" upper="${pi/2}" velocity="100" effort="100"/> 
+        <limit lower="-${pi/2}" upper="${pi}" velocity="100" effort="100"/> 
     </joint>
 
     <transmission name="front_sh_trans">
@@ -92,18 +118,18 @@
 
     <link name="front_leg">
         <visual>
-            <origin xyz="${thikness/2} 0 ${-leg_len/4}" rpy="0 0 0"/>
+            <origin xyz="0 0 ${-leg_len/4 -thikness/2}" rpy="0 0 0"/>
             <geometry>
-                <box size="${thikness} ${thikness} ${leg_len/2}" />
+                <box size="${thikness} ${thikness*2} ${leg_len/2}" />
             </geometry>
             <material name="orange">
                 <color rgba="0.2 1 0.2 1"/>
             </material>
         </visual>
         <collision>
-            <origin xyz="${thikness/2} 0 ${-leg_len/4}" rpy="0 0 0"/>
+            <origin xyz="0 0 ${-leg_len/4 -thikness/2}" rpy="0 0 0"/>
             <geometry>
-                <box size="${thikness-toll} ${thikness-toll} ${leg_len/2-toll}" />
+                <box size="${thikness-toll} ${thikness*2-toll} ${leg_len/2-toll}" />
             </geometry>
         </collision>
         <inertial>
@@ -115,7 +141,7 @@
 
     
     <joint name="front_knee" type="revolute">
-        <origin xyz="${thikness/2} 0 ${-leg_len/2}" rpy="0 0 0"/>
+        <origin xyz="0 0 ${-leg_len/2-thikness/2}" rpy="0 0 0"/>
         <parent link="front_leg"/>
         <child link="front_leg_d"/>
         <axis xyz="0 0 1"/>
@@ -134,7 +160,7 @@
         <visual>
             <origin xyz="0 0 ${-leg_len/4}" rpy="0 0 0"/>
             <geometry>
-                <box size="${thikness} ${thikness} ${leg_len/2}" />
+                <box size="${thikness} ${thikness*2} ${leg_len/2}" />
             </geometry>
             <material name="orange">
                 <color rgba="0.2 1 0.2 1"/>
@@ -143,7 +169,7 @@
         <collision>
             <origin xyz="0 0 ${-leg_len/4}" rpy="0 0 0"/>
             <geometry>
-                <box size="${thikness-toll} ${thikness-toll} ${leg_len/2-toll}" />
+                <box size="${thikness-toll} ${thikness*2-toll} ${leg_len/3-toll}" />
             </geometry>
         </collision>
         <inertial>
@@ -160,7 +186,7 @@
         <parent link="front_leg_d"/>
         <child link="front_foot"/>
         <axis xyz="0 -1 0"/>
-        <limit lower="${-pi/8}" upper="${pi/8}" velocity="100" effort="100"/> 
+        <limit lower="${-pi/2}" upper="${pi/2}" velocity="100" effort="100"/> 
     </joint>
 
     <transmission name="front_ank_trans">
@@ -168,14 +194,14 @@
         <actuator name="motor3">
             <mechanicalReduction>1.0</mechanicalReduction>
         </actuator>
-    </transmission>
+    </transmission>0.0
 
 
     <link name="front_foot">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <box size="${foot_len} ${foot_len} ${thikness}" />
+                <box size="${foot_len+thikness} ${foot_len*2.5} ${thikness}" />
             </geometry>
             <material name="white">
                 <color rgba="0.2 1 0.2 1"/>
@@ -184,7 +210,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <box size="${foot_len} ${foot_len} ${thikness-toll}" />
+                <box size="${foot_len+thikness} ${foot_len*2.5} ${thikness-toll}" />
             </geometry>
         </collision>
         <surface>
@@ -197,24 +223,26 @@
         </surface>
         <inertial>
             <origin xyz="0 0 0" rpy="0 0 0"/>
-            <mass value="1" />
-            <inertia ixx="0.096667" ixy="0.0" ixz="0.0" iyy="0.096667" iyz="0.0" izz="0.163333" />
+            <mass value="0.1" />
+            <inertia ixx="0.241667" ixy="0.0" ixz="0.0" iyy="0.454167" iyz="0.0" izz="0.163333" />
         </inertial>
     </link>
 
     <gazebo reference="front_foot">
-        <mu1>10.0</mu1>
-        <mu2>10.0</mu2>
+        <mu1>2</mu1>  
+        <mu2>2</mu2>  
+        <kp>1000000.0</kp>   
+        <kd>100.0</kd>        
     </gazebo>
-   
+    
 
     
     <joint name="back_sh" type="revolute">
-        <origin xyz="${-lenght/2} 0 ${-thikness/2}" rpy="0 0 0"/>
+        <origin xyz="${-lenght/2-thikness/2} 0 0" rpy="0 0 0"/>
         <parent link="body"/>
         <child link="back_leg"/>
         <axis xyz="0 -1 0"/>
-        <limit lower="-${pi/2}" upper="${pi/4}" velocity="100" effort="100"/> 
+        <limit lower="-${1.5*pi}" upper="${pi/2}" velocity="100" effort="100"/> 
     </joint>
 
     <transmission name="back_sh_trans">
@@ -226,18 +254,18 @@
 
     <link name="back_leg">
         <visual>
-            <origin xyz="${-thikness/2} 0 ${-leg_len/4}" rpy="0 0 0"/>
+            <origin xyz="0 0 ${-leg_len/4 -thikness/2}" rpy="0 0 0"/>
             <geometry>
-                <box size="${thikness} ${thikness} ${leg_len/2}" />
+                <box size="${thikness} ${thikness*2} ${leg_len/2}" />
             </geometry>
             <material name="orange">
                 <color rgba="0.2 1 0.2 1"/>
             </material>
         </visual>
         <collision>
-            <origin xyz="${-thikness/2} 0 ${-leg_len/4}" rpy="0 0 0"/>
+            <origin xyz="0 0 ${-leg_len/4 -thikness/2}" rpy="0 0 0"/>
             <geometry>
-                <box size="${thikness-toll} ${thikness-toll} ${leg_len/2-toll}" />
+                <box size="${thikness-toll} ${thikness*2-toll} ${leg_len/2-toll}" />
             </geometry>
         </collision>
         <inertial>
@@ -250,7 +278,7 @@
 
     
     <joint name="back_knee" type="revolute">
-        <origin xyz="${-thikness/2} 0 ${-leg_len/2}" rpy="0 0 0"/>
+        <origin xyz="0 0 ${-leg_len/2 -thikness/2}" rpy="0 0 0"/>
         <parent link="back_leg"/>
         <child link="back_leg_d"/>
         <axis xyz="0 0 1"/>
@@ -269,7 +297,7 @@
         <visual>
             <origin xyz="0 0 ${-leg_len/4}" rpy="0 0 0"/>
             <geometry>
-                <box size="${thikness} ${thikness} ${leg_len/2}" />
+                <box size="${thikness} ${thikness*2} ${leg_len/2}" />
             </geometry>
             <material name="orange">
                 <color rgba="0.2 1 0.2 1"/>
@@ -278,7 +306,7 @@
         <collision>
             <origin xyz="0 0 ${-leg_len/4}" rpy="0 0 0"/>
             <geometry>
-                <box size="${thikness-toll} ${thikness-toll} ${leg_len/2-toll}" />
+                <box size="${thikness-toll} ${thikness*2-toll} ${leg_len/3-toll}" />
             </geometry>
         </collision>
         <inertial>
@@ -295,7 +323,7 @@
         <parent link="back_leg_d"/>
         <child link="back_foot"/>
         <axis xyz="0 -1 0"/>
-        <limit lower="-${pi/8}" upper="${pi/8}" velocity="100" effort="100"/> 
+        <limit lower="-${pi/2}" upper="${pi/2}" velocity="100" effort="100"/> 
     </joint>
 
     <transmission name="back_ank_trans">
@@ -310,7 +338,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <box size="${foot_len} ${foot_len} ${thikness}" />
+                <box size="${foot_len+thikness} ${foot_len*2.5} ${thikness}" />
             </geometry>
             <material name="white">
                 <color rgba="0.2 1 0.2 1"/>
@@ -319,23 +347,21 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <box size="${foot_len} ${foot_len} ${thikness-toll}" />
+                <box size="${foot_len+thikness} ${foot_len*2.5} ${thikness-toll}" />
             </geometry>
         </collision>
-        <surface>
-            <friction>
-                <ode>
-                    <mu>10.0</mu>
-                    <mu2>10.0</mu2>
-                </ode>
-            </friction>
-        </surface>
         <inertial>
             <origin xyz="0 0 0" rpy="0 0 0"/>
-            <mass value="1" />
-            <inertia ixx="0.096667" ixy="0.0" ixz="0.0" iyy="0.096667" iyz="0.0" izz="0.163333" />
+            <mass value="0.1" />
+            <inertia ixx="0.241667" ixy="0.0" ixz="0.0" iyy="0.454167" iyz="0.0" izz="0.163333" />
         </inertial>
     </link>
 
+     <gazebo reference="back_foot">
+        <mu1>2</mu1>  
+        <mu2>2</mu2>  
+        <kp>1000000.0</kp>   
+        <kd>100.0</kd>        
+    </gazebo>
 
 </robot>

@@ -33,7 +33,9 @@ setup(
     entry_points={
     'console_scripts': [
         'controller = kumi_controller.kumi_controller:main',
-    ],
+        'com_calculator = kumi_controller.com_calculator:main',
+    ]
+
 },
 
 )
