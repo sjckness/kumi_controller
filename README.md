@@ -3,8 +3,8 @@ ros2 + gazebo model and control
 
 
 ## Issues / ToDo
-(+++) define a trajectory to test  
-
+(+++) resolve phisics problems in the urdf  
+(++) configure IMU plugin   
 
 ## Warnings
 (+) no real time kernel
