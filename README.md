@@ -4,7 +4,7 @@ ros2 + gazebo model and control
 
 ## Issues / ToDo
 (+++) resolve phisics problems in the urdf  
-(++) configure IMU plugin   
+ 
 
 ## Warnings
 (+) no real time kernel
@@ -14,6 +14,7 @@ ros2 + gazebo model and control
 (+++) (2)joint_trajectory_controller not loaded     21/07  
 (+++) (3)control the joint via python script        22/07  
 (+++) (4)robot goes around without permission!      27/08  
+(++) configure IMU plugin                           29/08  
 
 ## About
 ubuntu version: 22.04.5 LTS  
@@ -41,4 +42,4 @@ to kill gazebo
 | front_foot   | front_leg_d      | revolute   | Caviglia anteriore      |
 | back_leg     | body             | revolute   | Spalla posteriore       |
 | back_leg_d   | back_leg         | revolute   | Ginocchio posteriore    |
-| back_foot    | back_leg_d       | revolute   | Caviglia posteriore   
+| back_foot    | back_leg_d       | revolute   | Caviglia posteriore     |  
