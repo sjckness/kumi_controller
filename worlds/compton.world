@@ -4,7 +4,7 @@
 
     <gravity>0 0 -9.81</gravity>
 
-    <physics name="default_physics" type="bullet">
+    <physics type="bullet" name="bullet_physics">
       <max_step_size>0.001</max_step_size>
       <real_time_update_rate>1000</real_time_update_rate>
     </physics>
@@ -31,8 +31,10 @@
           <surface>
             <friction>
               <ode>
-                <mu>10.0</mu>      
-                <mu2>10.0</mu2> 
+                <mu>2</mu>
+                <mu2>2</mu2>
+                <kp>100000</kp> 
+                <kd>1</kd>
               </ode>
             </friction>
           </surface>

@@ -3,12 +3,20 @@ from rclpy.node import Node
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
 import os
+import csv
+from builtin_interfaces.msg import Duration
+import math
 import tempfile
 import xacro
 from launch_ros.substitutions import FindPackageShare
 
+position = [ [ 1, 2, 3], 
+             [ 4, 5, 6],
+             [ 7, 8, 9] ]
+
 pkg_share = FindPackageShare("kumi_controller").find("kumi_controller")
 xacro_file = os.path.join(pkg_share, 'description', 'kumi_core.xacro')
+traj_file = os.path.join(pkg_share, 'kumi_controller', 'targets.csv')
 #process xacro file to a str
 doc = xacro.parse(open(xacro_file))
 xacro.process_doc(doc)
@@ -36,22 +44,30 @@ class TrajectoryPublisher(Node):
 
     def send_trajectory(self):
         msg = JointTrajectory()
-        msg.joint_names = ['front_sh', 'front_knee', 'front_ank', 'back_sh', 'back_knee','back_ank',]
+        msg.joint_names = ['front_sh', 'front_knee', 'front_ank', 'back_sh', 'back_knee','back_ank']
 
-        p1 = JointTrajectoryPoint()
-        p1.positions = [-0.9, 0.0, 0.9, -0.9, 0.0, 0.9]   # posizione target in radianti
-        p1.time_from_start.sec = 5
+        points = []
+        with open(traj_file, newline="") as csvfile:
+            reader = csv.reader(csvfile)
+            next(reader)  # salta l’intestazione
+            
+            for row in reader:
+                time_float = float(row[0])  # prima colonna = tempo
+                secs = int(math.floor(time_float))
+                nanosecs = int((time_float - secs) * 1e9)
+                duration = Duration()
+                duration.sec = secs
+                duration.nanosec = nanosecs
 
-        p2 = JointTrajectoryPoint()
-        p2.positions = [1.57, 0.0, 0.0, -4.0, 0.0, 0.0]  # posizione target in radianti
-        p2.time_from_start.sec = 5
-        p2.time_from_start.nanosec = int(0.7 * 1e9)  # cioè 500000000
+                positions_deg = [float(x) for x in row[1:]]  # resto = posizioni giunti
+                positions_rads = [x / 180 * 3.14159265 for x in positions_deg] 
+                p = JointTrajectoryPoint()
+                p.positions = positions_rads
+                p.time_from_start = duration
+                points.append(p)
 
-        p3 = JointTrajectoryPoint()
-        p3.positions = [-0.0, 0.0, 0.0, -0.0, 0.0, 0.0]  # posizione target in radianti
-        p3.time_from_start.sec = 9
-
-        msg.points = [p1,p2]
+        print(points)
+        msg.points = points
         self.publisher_.publish(msg)
         self.get_logger().info('Trajectory sent!')
 

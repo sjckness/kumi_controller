@@ -22,6 +22,9 @@ setup(
 
         # Worlds (for Gazebo)
         (f'share/{package_name}/worlds', glob('worlds/*')),
+
+        # Controls
+        (f'share/{package_name}/kumi_controller', glob('kumi_controller/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

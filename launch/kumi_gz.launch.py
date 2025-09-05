@@ -17,9 +17,11 @@ from ament_index_python.packages import get_package_share_directory
 
 
 pkg_share = FindPackageShare("kumi_controller").find("kumi_controller")
-xacro_file = os.path.join(pkg_share, 'description', 'kumi_core.xacro')
+xacro_file = os.path.join(pkg_share, 'description', 'kumi.xacro')
 yaml_config_path= os.path.join(pkg_share, "config", "kumi_control_config.yaml")
-world_path = os.path.join(pkg_share, "worlds", "empty.world")
+#yaml_config_path= os.path.join(pkg_share, "config", "kumi_effort_cntr_cnfg.yaml")
+world_path = os.path.join(pkg_share, "worlds", "friction_ramp.world")
+#world_path = os.path.join(pkg_share, "worlds", "compton.world")
 robot_description_content = ParameterValue(
         Command(['xacro ', xacro_file]),
         value_type=str  #Indica esplicitamente che è una stringa
@@ -132,7 +134,7 @@ def generate_launch_description():
             actions=[
             ExecuteProcess(
                 cmd=['gazebo', '--verbose', 
-                     '/usr/share/gazebo-11/worlds/empty.world',
+                     world_path,
                     '-s', 'libgazebo_ros_factory.so'
                 ],
                 output='screen',
