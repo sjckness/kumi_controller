@@ -3,7 +3,8 @@ ros2 + gazebo model and control
 
 
 ## Issues / ToDo
-(+++) resolve phisics problems in the urdf  
+(+++) effort controller for better friction  
+(++) resolve phisics problems in the urdf   
  
 
 ## Warnings
