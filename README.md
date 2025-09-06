@@ -1,4 +1,4 @@
-# kumi_controller
+# kumi
 ros2 + gazebo model and control
 
 
