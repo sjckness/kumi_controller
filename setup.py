@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 from glob import glob
 
-package_name = 'kumi_controller'
+package_name = 'kumi'
 
 setup(
     name=package_name,
@@ -22,9 +22,6 @@ setup(
 
         # Worlds (for Gazebo)
         (f'share/{package_name}/worlds', glob('worlds/*')),
-
-        # Controls
-        (f'share/{package_name}/kumi_controller', glob('kumi_controller/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -35,8 +32,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
     'console_scripts': [
-        'controller = kumi_controller.kumi_controller:main',
-        'com_calculator = kumi_controller.com_calculator:main',
+        'controller = kumi.kumi_controller:main',
+        'com_calculator = kumi.com_calculator:main',
     ]
 
 },

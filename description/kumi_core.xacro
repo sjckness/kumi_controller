@@ -45,7 +45,7 @@
     
     <gazebo>
         <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
-            <parameters>/home/andreas/dev_ws/install/kumi_controller/share/kumi_controller/config/kumi_control_config.yaml</parameters>  
+            <parameters>/home/andreas/dev_ws/install/kumi_controller/share/kumi_controller/config/kumi_effort_cntr_cnfg.yaml</parameters>  
         </plugin>
     </gazebo>
 

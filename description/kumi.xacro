@@ -10,39 +10,44 @@
     <xacro:property name="toll" value="0.005" />
     <xacro:property name="mass" value="0.3" />
 
-    <xacro:property name="controller_yaml_path" value="/home/andreas/dev_ws/install/kumi_controller/share/kumi_controller/config/position_cntr.yaml" />
 
     <ros2_control name="KumiHardware" type="system">
         <hardware>
             <plugin>gazebo_ros2_control/GazeboSystem</plugin>
         </hardware>
         <joint name="front_sh">
-            <command_interface name="position"/>
+            <command_interface name="effort"/>
+            <state_interface name="effort"/>
             <state_interface name="position"/>
             <state_interface name="velocity"/>
         </joint>
         <joint name="back_sh">
-            <command_interface name="position"/>
+            <command_interface name="effort"/>
+            <state_interface name="effort"/>
             <state_interface name="position"/>
             <state_interface name="velocity"/>
         </joint>
         <joint name="front_knee">
-            <command_interface name="position"/>
+            <command_interface name="effort"/>
+            <state_interface name="effort"/>
             <state_interface name="position"/>
             <state_interface name="velocity"/>
         </joint>
         <joint name="back_knee">
-            <command_interface name="position"/>
+            <command_interface name="effort"/>
+            <state_interface name="effort"/>
             <state_interface name="position"/>
             <state_interface name="velocity"/>
         </joint>
         <joint name="front_ank">
-            <command_interface name="position"/>
+            <command_interface name="effort"/>
+            <state_interface name="effort"/>
             <state_interface name="position"/>
             <state_interface name="velocity"/>
         </joint>
         <joint name="back_ank">
-            <command_interface name="position"/>
+            <command_interface name="effort"/>
+            <state_interface name="effort"/>
             <state_interface name="position"/>
             <state_interface name="velocity"/>
         </joint>
@@ -50,7 +55,7 @@
     
     <gazebo>
         <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
-            <parameters>/home/andreas/dev_ws/install/kumi_controller/share/kumi_controller/config/kumi_control_config.yaml</parameters>  
+            <parameters>/home/andreas/dev_ws/install/kumi/share/kumi/config/kumi_effort_cntr_cnfg.yaml</parameters>  
         </plugin>
     </gazebo>s
 
@@ -86,13 +91,6 @@
         <limit lower="-${pi/2}" upper="${pi}" velocity="100" effort="100"/> 
     </joint>
 
-    <transmission name="front_sh_trans">
-        <type>transmission_interface/SimpleTransmission</type>
-        <actuator name="motor1">
-            <mechanicalReduction>1.0</mechanicalReduction>
-        </actuator>
-    </transmission>
-
     <link name="front_leg">
         <visual>
             <origin xyz="0 0 ${-leg_len/2}" rpy="0 0 0"/>
@@ -123,13 +121,6 @@
         <axis xyz="0 0 1"/>
         <limit lower="${-pi/4}" upper="${pi/4}" velocity="100" effort="100"/> 
     </joint>
-
-    <transmission name="front_knee_trans">
-        <type>transmission_interface/SimpleTransmission</type>
-        <actuator name="motor2">
-            <mechanicalReduction>1.0</mechanicalReduction>
-        </actuator>
-    </transmission>
 
     <link name="front_leg_d">
         <visual>
@@ -162,13 +153,6 @@
         <limit lower="${-pi/4}" upper="${pi/4}" velocity="100" effort="100"/> 
     </joint>
 
-    <transmission name="front_ank_trans">
-        <type>transmission_interface/SimpleTransmission</type>
-        <actuator name="motor3">
-            <mechanicalReduction>1.0</mechanicalReduction>
-        </actuator>
-    </transmission>
-
     <link name="front_foot">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -200,12 +184,6 @@
         <limit lower="-${pi}" upper="${pi/2}" velocity="100" effort="100"/> 
     </joint>
 
-    <transmission name="back_sh_trans">
-        <type>transmission_interface/SimpleTransmission</type>
-        <actuator name="motor4">
-            <mechanicalReduction>1.0</mechanicalReduction>
-        </actuator>
-    </transmission>
 
     <link name="back_leg">
         <visual>
@@ -238,12 +216,6 @@
         <limit lower="${-pi/4}" upper="${pi/4}" velocity="100" effort="100"/> 
     </joint>
 
-    <transmission name="back_knee_trans">
-        <type>transmission_interface/SimpleTransmission</type>
-        <actuator name="motor5">
-            <mechanicalReduction>1.0</mechanicalReduction>
-        </actuator>
-    </transmission>
 
     <link name="back_leg_d">
         <visual>
@@ -276,12 +248,6 @@
         <limit lower="${-pi/4}" upper="${pi/4}" velocity="100" effort="100"/> 
     </joint>
 
-    <transmission name="back_ank_trans">
-        <type>transmission_interface/SimpleTransmission</type>
-        <actuator name="motor6">
-            <mechanicalReduction>1.0</mechanicalReduction>
-        </actuator>
-    </transmission>
 
     <link name="back_foot">
         <visual>

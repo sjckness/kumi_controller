@@ -16,10 +16,10 @@ from ament_index_python.packages import get_package_share_directory
 
 
 
-pkg_share = FindPackageShare("kumi_controller").find("kumi_controller")
+pkg_share = FindPackageShare("kumi").find("kumi")
 xacro_file = os.path.join(pkg_share, 'description', 'kumi.xacro')
-yaml_config_path= os.path.join(pkg_share, "config", "kumi_control_config.yaml")
-#yaml_config_path= os.path.join(pkg_share, "config", "kumi_effort_cntr_cnfg.yaml")
+#yaml_config_path= os.path.join(pkg_share, "config", "kumi_control_config.yaml")
+yaml_config_path= os.path.join(pkg_share, "config", "kumi_effort_cntr_cnfg.yaml")
 world_path = os.path.join(pkg_share, "worlds", "friction_ramp.world")
 #world_path = os.path.join(pkg_share, "worlds", "compton.world")
 robot_description_content = ParameterValue(
@@ -59,7 +59,7 @@ def launch_setup(context, *args, **kwargs):
 
         # spawning kumi in gazebo
         TimerAction(
-            period=1.0,
+            period=5.0,
             actions=[
                 Node(
                     package='gazebo_ros',
@@ -86,7 +86,7 @@ def launch_setup(context, *args, **kwargs):
 
         #spawning joint_state_broadcaster
         TimerAction(
-            period=0.5,
+            period=3.0,
             actions=[
                 Node(
                     package="controller_manager",
@@ -99,13 +99,12 @@ def launch_setup(context, *args, **kwargs):
 
         #spawning front_sh_trajectory_controller
         TimerAction(
-            period=0.5,
+            period=3.0,
             actions=[
                 Node(
                     package="controller_manager",
                     executable="spawner",
-                    arguments=["multi_joint_trajectory_controller",
-                                "--controller-manager-timeout", "50"],
+                    arguments=["effort_joint_controller"],
                     parameters=[yaml_config_path],
                     output="screen",
                 ),
@@ -146,7 +145,7 @@ def generate_launch_description():
         OpaqueFunction(function=launch_setup),
 
         Node(
-            package='kumi_controller',
+            package='kumi',
             executable='com_calculator',
             name='com_calculator',
             parameters=[urdf_file]

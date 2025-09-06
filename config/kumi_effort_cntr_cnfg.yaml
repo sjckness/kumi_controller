@@ -5,10 +5,9 @@ controller_manager:
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
       update_rate: 10
-    effort_joint_effort_controller:
+    effort_joint_controller:
       type: effort_controllers/JointGroupEffortController
-
-effort_joint_effort_controller:
+effort_joint_controller:
   ros__parameters:
     joints:
       - front_sh
