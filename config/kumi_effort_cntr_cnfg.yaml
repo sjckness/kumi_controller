@@ -7,6 +7,7 @@ controller_manager:
       update_rate: 10
     effort_joint_controller:
       type: effort_controllers/JointGroupEffortController
+      update_rate: 100
 effort_joint_controller:
   ros__parameters:
     joints:
@@ -23,6 +24,6 @@ effort_joint_controller:
       - velocity
       - position
     pid:
-      p: 100.0
+      p: 1.0
       i: 0.0
       d: 0.0

@@ -22,6 +22,9 @@ setup(
 
         # Worlds (for Gazebo)
         (f'share/{package_name}/worlds', glob('worlds/*')),
+        
+        # Worlds (for Gazebo)
+        (f'share/{package_name}/cntr_files', glob('cntr_files/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -33,6 +36,7 @@ setup(
     entry_points={
     'console_scripts': [
         'controller = kumi.kumi_controller:main',
+        'PID_effort_controller = kumi.PID_effort_controller:main',
         'com_calculator = kumi.com_calculator:main',
     ]
 

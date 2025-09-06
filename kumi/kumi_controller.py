@@ -14,7 +14,7 @@ position = [ [ 1, 2, 3],
              [ 4, 5, 6],
              [ 7, 8, 9] ]
 
-pkg_share = FindPackageShare("kumi_controller").find("kumi_controller")
+pkg_share = FindPackageShare("kumi").find("kumi")
 xacro_file = os.path.join(pkg_share, 'description', 'kumi_core.xacro')
 traj_file = os.path.join(pkg_share, 'kumi_controller', 'targets.csv')
 #process xacro file to a str
