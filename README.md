@@ -3,8 +3,10 @@ ros2 + gazebo model and control
 
 
 ## Issues / ToDo
-(+++) effort controller for better friction  
-(++) resolve phisics problems in the urdf   
+(+++) connect matlab  
+(++)  wrong inertias  
+(++)  set and define phisics limits  
+(??)  resolve phisics problems in the urdf   
 
  
 
@@ -16,7 +18,8 @@ ros2 + gazebo model and control
 (+++) (2)joint_trajectory_controller not loaded     21/07  
 (+++) (3)control the joint via python script        22/07  
 (+++) (4)robot goes around without permission!      27/08  
-(++) configure IMU plugin                           29/08  
+(++)  (5)configure IMU plugin                       29/08 
+(++)  (6)configured effort controller               06/09
 
 ## About
 ubuntu version: 22.04.5 LTS  
