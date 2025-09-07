@@ -31,13 +31,10 @@ def load_trajectory_from_csv(traj_file):
 
             p = JointTrajectoryPoint()
             p.positions = positions_rads
-
-            p.positions = positions_rads
             p.time_from_start = duration
             points.append(p)
 
     return points
-
 
 pkg_share = FindPackageShare("kumi").find("kumi")
 traj_file = os.path.join(pkg_share, 'cntr_files', 'targets.csv')
@@ -53,6 +50,7 @@ class PIDController(Node):
         self.declare_parameter('kd', [0.0] * 6)
         self.declare_parameter('max_effort', 10.0)
         self.declare_parameter('max_delta', 1.0)
+        self.declare_parameter('use_pid', True)
 
         self.joints = self.get_parameter('joints').get_parameter_value().string_array_value
         self.kp = np.array(self.get_parameter('kp').get_parameter_value().double_array_value)
@@ -60,35 +58,59 @@ class PIDController(Node):
         self.kd = np.array(self.get_parameter('kd').get_parameter_value().double_array_value)
         self.max_effort = self.get_parameter('max_effort').get_parameter_value().double_value
         self.max_delta = self.get_parameter('max_delta').get_parameter_value().double_value
+        self.use_pid = self.get_parameter('use_pid').get_parameter_value().bool_value
 
         # Stato dei giunti
         self.target_positions = np.zeros(6)
         self.last_positions = np.zeros(6)
-        self.last_errors = np.zeros(6)
-        self.integrals = np.zeros(6)
         self.last_velocities = np.zeros(6)
+        self.integrals = np.zeros(6)
         self.last_efforts = np.zeros(6)
+        self.external_efforts = np.zeros(6)
 
         # Traiettoria
         self.traj_points = load_trajectory_from_csv(traj_file)
         self.current_step = 0
 
-        # Subscriber e publisher
+        # Subscriber giunti
         self.subscriber = self.create_subscription(
             JointState,
             '/joint_states',
             self.joint_state_callback,
             10
         )
+
+        # Subscriber da GUI
+        self.sub_pid = self.create_subscription(
+            Float64MultiArray,
+            '/pid_params',
+            self.pid_callback,
+            10
+        )
+
+        # Publisher effort
         self.publisher = self.create_publisher(
             Float64MultiArray,
             '/effort_joint_controller/commands',
             10
         )
+        # Publisher target positions
+        self.publisher_target = self.create_publisher(
+            Float64MultiArray,
+            '/target_positions',
+            10
+        )
+        # Publisher stato giunti
+        self.publisher_state = self.create_publisher(
+            Float64MultiArray,
+            '/joint_state_array',
+            10
+        )
 
-        # Timer a 10Hz
+        # Timer a 1ms
         self.timer = self.create_timer(0.001, self.control_loop)
 
+    # --- Callback Subscriber ---
     def joint_state_callback(self, msg):
         joint_names = msg.name
         joint_positions = np.array(msg.position)
@@ -97,34 +119,63 @@ class PIDController(Node):
         self.last_positions = joint_positions[joint_indices]
         self.last_velocities = joint_velocities[joint_indices]
 
+    def pid_callback(self, msg):
+        data = np.array(msg.data)
+        if len(data) == 3:
+            self.kp[:] = data[0]
+            self.ki[:] = data[1]
+            self.kd[:] = data[2]
+            self.get_logger().info(f"Updated PID params: P={self.kp}, I={self.ki}, D={self.kd}")
+
+    def target_callback(self, msg):
+        data = np.array(msg.data)
+        if len(data) == 6:
+            self.target_positions = data
+            self.get_logger().info(f"Updated target positions: {self.target_positions}")
+
+    # --- Controllo ---
     def control_loop(self):
-        # Aggiorna target positions dalla traiettoria
-        if self.current_step < len(self.traj_points):
+        # Aggiorna target dalla traiettoria se PID attivo
+        if self.use_pid and self.current_step < len(self.traj_points):
             target_positions = self.traj_points[self.current_step].positions
             self.current_step += 1
             self.target_positions = np.array(target_positions)
 
-        # Calcolo PID
-        errors = self.target_positions - self.last_positions
-        self.integrals += errors
-        derivatives = self.last_velocities
+        # Calcolo efforts
+        if self.use_pid:
+            errors = self.target_positions - self.last_positions
+            self.integrals += errors
+            derivatives = self.last_velocities
 
-        efforts = self.kp * errors + self.ki * self.integrals - self.kd * derivatives
-        efforts = np.clip(efforts, -self.max_effort, self.max_effort)
+            efforts = self.kp * errors + self.ki * self.integrals - self.kd * derivatives
+            efforts = np.clip(efforts, -self.max_effort, self.max_effort)
 
-        delta_efforts = efforts - self.last_efforts
-        delta_efforts = np.clip(delta_efforts, -self.max_delta, self.max_delta)
-        efforts = self.last_efforts + delta_efforts
+            delta_efforts = efforts - self.last_efforts
+            delta_efforts = np.clip(delta_efforts, -self.max_delta, self.max_delta)
+            efforts = self.last_efforts + delta_efforts
+            self.last_efforts = efforts
+        else:
+            efforts = self.external_efforts
 
-        self.last_efforts = efforts
+        # --- Pubblica messages ---
+        # Effort
+        msg_effort = Float64MultiArray()
+        msg_effort.data = efforts.tolist()
+        self.publisher.publish(msg_effort)
 
-        # Pubblica
-        msg = Float64MultiArray()
-        msg.data = efforts.tolist()
-        self.publisher.publish(msg)
-        self.get_logger().info('Sending efforts: %s' % efforts)
-        self.get_logger().info('target ositions: %s' % self.target_positions)
-        self.get_logger().info('Positions: %s' % self.last_positions)
+        # Target positions
+        msg_target = Float64MultiArray()
+        msg_target.data = self.target_positions.tolist()
+        self.publisher_target.publish(msg_target)
+
+        # Stato giunti
+        msg_state = Float64MultiArray()
+        msg_state.data = self.last_positions.tolist()
+        self.publisher_state.publish(msg_state)
+
+        # --- Logging ---
+        self.get_logger().info(f"Efforts: {efforts}")
+        self.get_logger().info(f"Target positions: {self.target_positions}")
 
 def main(args=None):
     rclpy.init(args=args)
@@ -135,4 +186,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
