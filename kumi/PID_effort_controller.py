@@ -44,9 +44,10 @@ class PIDController(Node):
         super().__init__('pid_controller')
 
         # Parametri
-        self.declare_parameter('joints', ['front_sh', 'front_knee', 'front_ank', 'back_sh', 'back_knee','back_ank'])
-        self.declare_parameter('kp', [2.0] * 6)
-        self.declare_parameter('ki', [0.5] * 6)
+        self.declare_parameter('joints', ['front_sh', 'front_knee', 'front_ank',
+                                          'back_sh', 'back_knee','back_ank'])
+        self.declare_parameter('kp', [0.0] * 6)
+        self.declare_parameter('ki', [0.0] * 6)
         self.declare_parameter('kd', [0.0] * 6)
         self.declare_parameter('max_effort', 10.0)
         self.declare_parameter('max_delta', 1.0)
@@ -66,7 +67,6 @@ class PIDController(Node):
         self.last_velocities = np.zeros(6)
         self.integrals = np.zeros(6)
         self.last_efforts = np.zeros(6)
-        self.external_efforts = np.zeros(6)
 
         # Traiettoria
         self.traj_points = load_trajectory_from_csv(traj_file)
@@ -80,11 +80,17 @@ class PIDController(Node):
             10
         )
 
-        # Subscriber da GUI
+        # Subscriber PID e target positions
         self.sub_pid = self.create_subscription(
             Float64MultiArray,
             '/pid_params',
             self.pid_callback,
+            10
+        )
+        self.sub_target = self.create_subscription(
+            Float64MultiArray,
+            '/target_positions',
+            self.target_callback,
             10
         )
 
@@ -92,12 +98,6 @@ class PIDController(Node):
         self.publisher = self.create_publisher(
             Float64MultiArray,
             '/effort_joint_controller/commands',
-            10
-        )
-        # Publisher target positions
-        self.publisher_target = self.create_publisher(
-            Float64MultiArray,
-            '/target_positions',
             10
         )
         # Publisher stato giunti
@@ -126,6 +126,11 @@ class PIDController(Node):
             self.ki[:] = data[1]
             self.kd[:] = data[2]
             self.get_logger().info(f"Updated PID params: P={self.kp}, I={self.ki}, D={self.kd}")
+        elif len(data) == 18:
+            self.kp[:] = data[0:6]
+            self.ki[:] = data[6:12]
+            self.kd[:] = data[12:18]
+            self.get_logger().info("Updated PID params per joint")
 
     def target_callback(self, msg):
         data = np.array(msg.data)
@@ -136,46 +141,40 @@ class PIDController(Node):
     # --- Controllo ---
     def control_loop(self):
         # Aggiorna target dalla traiettoria se PID attivo
-        if self.use_pid and self.current_step < len(self.traj_points):
+        if self.current_step < len(self.traj_points):
             target_positions = self.traj_points[self.current_step].positions
             self.current_step += 1
             self.target_positions = np.array(target_positions)
 
         # Calcolo efforts
-        if self.use_pid:
-            errors = self.target_positions - self.last_positions
-            self.integrals += errors
-            derivatives = self.last_velocities
+        errors = self.target_positions - self.last_positions
+        self.integrals += errors
+        derivatives = self.last_velocities
 
-            efforts = self.kp * errors + self.ki * self.integrals - self.kd * derivatives
-            efforts = np.clip(efforts, -self.max_effort, self.max_effort)
+        efforts = self.kp * errors + self.ki * self.integrals - self.kd * derivatives
+        efforts = np.clip(efforts, -self.max_effort, self.max_effort)
 
-            delta_efforts = efforts - self.last_efforts
-            delta_efforts = np.clip(delta_efforts, -self.max_delta, self.max_delta)
-            efforts = self.last_efforts + delta_efforts
-            self.last_efforts = efforts
-        else:
-            efforts = self.external_efforts
+        delta_efforts = efforts - self.last_efforts
+        delta_efforts = np.clip(delta_efforts, -self.max_delta, self.max_delta)
+        efforts = self.last_efforts + delta_efforts
+        self.last_efforts = efforts
 
-        # --- Pubblica messages ---
-        # Effort
+        # --- Pubblica ---
         msg_effort = Float64MultiArray()
         msg_effort.data = efforts.tolist()
         self.publisher.publish(msg_effort)
 
-        # Target positions
         msg_target = Float64MultiArray()
         msg_target.data = self.target_positions.tolist()
-        self.publisher_target.publish(msg_target)
+        self.publisher_state.publish(msg_target)
 
-        # Stato giunti
         msg_state = Float64MultiArray()
         msg_state.data = self.last_positions.tolist()
         self.publisher_state.publish(msg_state)
 
-        # --- Logging ---
         self.get_logger().info(f"Efforts: {efforts}")
         self.get_logger().info(f"Target positions: {self.target_positions}")
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -184,5 +183,7 @@ def main(args=None):
     pid_controller.destroy_node()
     rclpy.shutdown()
 
+
 if __name__ == '__main__':
     main()
+

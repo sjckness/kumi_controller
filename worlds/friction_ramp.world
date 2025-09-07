@@ -28,8 +28,8 @@
               <surface>
                 <friction>
                   <ode>
-                    <mu>2</mu>
-                    <mu2>2</mu2>
+                    <mu>0.8</mu>
+                    <mu2>0.8</mu2>
                     <kp>100000</kp> 
                     <kd>1</kd>
                   </ode>
@@ -50,6 +50,46 @@
             </visual>
             
             <pose>0 0 1 0 0 0</pose>
+
+
+          </link>
+        </model>
+
+        <model name="support">
+          <static>true</static>
+          <link name="support_link">
+
+            <collision name="collision">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.01</size> 
+                </box>
+              </geometry>
+              <surface>
+                <friction>
+                  <ode>
+                    <mu>10</mu>
+                    <mu2>10</mu2>
+                    <kp>100000</kp> 
+                    <kd>1</kd>
+                  </ode>
+                </friction>
+              </surface>
+            </collision>
+
+            <visual name="visual">
+              <geometry>
+                <box>
+                  <size>0.5 0.5 0.01</size>
+                </box>
+              </geometry>
+              <material>
+                <ambient>0.7 0.7 0.7 1</ambient>
+                <diffuse>0.7 0.7 0.7 1</diffuse>
+              </material>
+            </visual>
+            
+            <pose>0 0 2 0 0 0</pose>
 
 
           </link>

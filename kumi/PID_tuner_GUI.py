@@ -2,6 +2,7 @@ import sys
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float64MultiArray
+from sensor_msgs.msg import JointState
 from PyQt5 import QtWidgets, QtCore, QtGui
 import numpy as np
 
@@ -12,19 +13,24 @@ class PIDTunerGUI(Node):
         # ROS Publishers
         self.pub_target = self.create_publisher(Float64MultiArray, '/target_positions', 10)
         self.pub_pid = self.create_publisher(Float64MultiArray, '/pid_params', 10)
-        self.pub_joint_state = self.create_publisher(Float64MultiArray, '/joint_state_array', 10)
 
         # ROS Subscriber
-        self.sub_joint_state = self.create_subscription(Float64MultiArray,
-                                                        '/joint_state_array',
-                                                        self.joint_state_callback,
-                                                        10)
+        self.sub_joint_state = self.create_subscription(
+            JointState, '/joint_states', self.joint_state_callback, 10
+        )
 
         # Dati giunti
-        self.joint_names = ['front_sh', 'front_knee', 'front_ank', 'back_sh', 'back_knee','back_ank']
+        self.joint_names = [
+            'front_sh', 'back_sh', 'front_ank',
+            'back_sh', 'back_knee', 'back_ank'
+        ]
         self.current_positions = np.zeros(6)
         self.target_positions = np.zeros(6)
-        self.pid_params = np.array([[2.0, 0.5, 0.0] for _ in range(6)])  # P,I,D per giunto
+        self.pid_params = np.array([[0.0, 0.0, 0.0] for _ in range(6)])  # P,I,D per giunto
+
+        # QSettings per salvataggio automatico
+        self.settings = QtCore.QSettings("MyOrg", "PIDTunerGUI")
+        self.load_settings()
 
         # GUI
         self.app = QtWidgets.QApplication(sys.argv)
@@ -116,28 +122,27 @@ class PIDTunerGUI(Node):
         self.timer.start(50)
 
         self.window.show()
+        self.window.closeEvent = self.closeEvent  # intercetta chiusura finestra
 
     # --- ROS callback ---
-    def joint_state_callback(self, msg):
-        self.current_positions = np.array(msg.data)
+    def joint_state_callback(self, msg: JointState):
+        indices = [msg.name.index(j) for j in self.joint_names if j in msg.name]
+        self.current_positions = np.array([msg.position[i] for i in indices])
 
     # --- Update sliders/spinbox ---
     def update_joint_selection(self):
         self.selected_joint = self.joint_selector.currentIndex()
-        # aggiorna sliders/spinbox con valori correnti
-        idx = self.selected_joint
-        if idx == 6:  # All
-            idx = 0
+        idx = self.selected_joint if self.selected_joint < 6 else 0
         for i in range(3):
             self.sliders_pid[i].setValue(int(self.pid_params[idx,i]*100))
             self.spin_pid[i].setValue(self.pid_params[idx,i])
-            self.slider_target.setValue(int(self.target_positions[idx]*180/np.pi))
-            self.spin_target.setValue(self.target_positions[idx]*180/np.pi)
+        self.slider_target.setValue(int(self.target_positions[idx]*180/np.pi))
+        self.spin_target.setValue(self.target_positions[idx]*180/np.pi)
 
     def update_pid_from_slider(self):
         for i in range(3):
             val = self.sliders_pid[i].value()/100
-            if self.selected_joint == 6:  # All
+            if self.selected_joint == 6:
                 self.pid_params[:,i] = val
             else:
                 self.pid_params[self.selected_joint,i] = val
@@ -158,7 +163,7 @@ class PIDTunerGUI(Node):
             self.target_positions[:] = val_rad
         else:
             self.target_positions[self.selected_joint] = val_rad
-        self.spin_target.setValue(self.slider_target.value())
+        self.spin_target.setValue(float(self.slider_target.value()))
 
     def update_target_from_spinbox(self):
         val_rad = self.spin_target.value() * np.pi / 180
@@ -168,28 +173,25 @@ class PIDTunerGUI(Node):
             self.target_positions[self.selected_joint] = val_rad
         self.slider_target.setValue(int(self.spin_target.value()))
 
-
     # --- Aggiorna display e pubblica ---
     def update_all(self):
         for i, dial in enumerate(self.dials):
-            val_deg = int(self.current_positions[i]*180/np.pi)
+            val_deg = int(self.current_positions[i] * 180 / np.pi)
+            val_deg = max(dial.minimum(), min(dial.maximum(), val_deg))
             dial.setValue(val_deg)
             error = abs(self.target_positions[i] - self.current_positions[i])
             color = QtGui.QColor(0,255,0) if error < 0.05 else QtGui.QColor(255,0,0)
-            dial.setStyleSheet(f"QDial {{ background-color: {color.name()}; }}")
             self.dial_value_labels[i].setText(f"{val_deg:.1f}°")
+            self.dial_value_labels[i].setStyleSheet(f"color: {color.name()};")
 
-        # Aggiorna errore percentuale del joint selezionato
         idx = self.selected_joint if self.selected_joint < 6 else 0
-        target_deg = self.target_positions[idx]*180/np.pi
-        current_deg = self.current_positions[idx]*180/np.pi
+        target_deg = self.target_positions[idx] * 180 / np.pi
+        current_deg = self.current_positions[idx] * 180 / np.pi
         error_pct = abs(target_deg - current_deg)/abs(target_deg)*100 if target_deg !=0 else 0
         self.label_error.setText(f"Err: {error_pct:.1f}%")
 
-        # Pubblica valori ROS
         self.publish_pid()
         self.publish_target()
-        self.publish_joint_state()
 
     def publish_pid(self):
         msg = Float64MultiArray()
@@ -201,10 +203,25 @@ class PIDTunerGUI(Node):
         msg.data = self.target_positions.tolist()
         self.pub_target.publish(msg)
 
-    def publish_joint_state(self):
-        msg = Float64MultiArray()
-        msg.data = self.current_positions.tolist()
-        self.pub_joint_state.publish(msg)
+    # --- Salvataggio e caricamento ---
+    def save_settings(self):
+        for i, name in enumerate(self.joint_names):
+            self.settings.setValue(f"{name}/P", self.pid_params[i,0])
+            self.settings.setValue(f"{name}/I", self.pid_params[i,1])
+            self.settings.setValue(f"{name}/D", self.pid_params[i,2])
+            self.settings.setValue(f"{name}/Target", self.target_positions[i])
+        self.settings.sync()
+
+    def load_settings(self):
+        for i, name in enumerate(self.joint_names):
+            self.pid_params[i,0] = float(self.settings.value(f"{name}/P", 0.0))
+            self.pid_params[i,1] = float(self.settings.value(f"{name}/I", 0.0))
+            self.pid_params[i,2] = float(self.settings.value(f"{name}/D", 0.0))
+            self.target_positions[i] = float(self.settings.value(f"{name}/Target", 0.0))
+
+    def closeEvent(self, event):
+        self.save_settings()
+        event.accept()
 
     def run(self):
         sys.exit(self.app.exec_())
@@ -215,9 +232,9 @@ def main(args=None):
     try:
         gui_node.run()
     finally:
+        gui_node.save_settings()
         gui_node.destroy_node()
         rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
-
